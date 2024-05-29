@@ -1,5 +1,7 @@
 <?php
 session_start();
+include '../layout/header.php';
+
 ?>
 
 <body>
@@ -176,12 +178,12 @@ session_start();
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
             <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
-            <span class="d-none d-md-block dropdown-toggle ps-2">K. Anderson</span>
+            <span class="d-none d-md-block dropdown-toggle ps-2">Dava Rizky</span>
           </a><!-- End Profile Iamge Icon -->
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
-              <h6>Kevin Anderson</h6>
+              <h6>Dava Rizky</h6>
               <span>Web Designer</span>
             </li>
             <li>
@@ -189,37 +191,24 @@ session_start();
             </li>
 
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+              <a class="dropdown-item d-flex align-items-center" href="form/change_login.php">
                 <i class="bi bi-person"></i>
-                <span>My Profile</span>
+                <span>Rubah Password</span>
               </a>
             </li>
             <li>
               <hr class="dropdown-divider">
             </li>
 
+          
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
-                <i class="bi bi-gear"></i>
-                <span>Account Settings</span>
-              </a>
+              <hr class="dropdown-divider">
             </li>
-            <li>
               <hr class="dropdown-divider">
             </li>
 
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="pages-faq.html">
-                <i class="bi bi-question-circle"></i>
-                <span>Need Help?</span>
-              </a>
-            </li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-
-            <li>
-              <a class="dropdown-item d-flex align-items-center" href="../page/auth/login.php">
+              <a class="dropdown-item d-flex align-items-center" href="form/login.php">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Sign Out</span>
               </a>
@@ -238,8 +227,7 @@ session_start();
 
     <ul class="sidebar-nav" id="sidebar-nav">
 
-      
-    <li class="nav-item">
+      <li class="nav-item">
         <a class="nav-link collapsed" href="">
         <i class="bi bi-book"></i>
           <span>Dashboard</span>
@@ -263,7 +251,9 @@ session_start();
           <span>Kelas</span>
         </a>
       </li>
-      </li><!-- End Dashboard Nav -->
+      
+      
+      <!-- End Dashboard Nav -->
 
     
     </ul>
@@ -272,11 +262,103 @@ session_start();
 
   <main id="main" class="main">
 
-    <section class="section">
-     
+
+  <section class="section">
+      <div class="container">
+        <a href="tambah.php" class="btn btn-primary">Tambah Data Kelas</a>
+        <div class="row">
+          <div class="col">
+            <?php
+            if (isset($_SESSION['message'])) {
+                echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                        {$_SESSION['message']}
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                      </div>";
+                unset($_SESSION['message']);
+            }
+            ?>
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Kode Kelas</th>
+                    <th scope="col">Tingkat</th>
+                    <th scope="col">Jurusan ID</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody">
+                  <?php
+                  include '../config/database.php';
+
+                  $database = new db();
+                  $database->koneksi();
+
+                  $cari = isset($_GET['cari']) ? $_GET['cari'] : '';
+                  $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+                  $limit = 5;
+                  $maju = $offset + $limit;
+                  $mundur = $offset - $limit;
+
+                  $countQuery = "SELECT COUNT(*) AS total FROM kelas WHERE kode_kelas LIKE '%$cari%' OR tingkat LIKE '%$cari%' OR jurusan_id LIKE '%$cari%'";
+                  $totalData = $database->ambil_data($countQuery);
+                  $totalData = $totalData[0]['total'];
+
+                  $nextDisabled = ($totalData <= $maju) ? 'disabled' : '';
+
+                  $query = "SELECT * FROM kelas WHERE kode_kelas LIKE '%$cari%' OR tingkat LIKE '%$cari%' OR jurusan_id LIKE '%$cari%' LIMIT $limit OFFSET $offset";
+                  $data = $database->ambil_data($query);
+
+                  $no = $offset + 1;
+
+                  foreach ($data as $row) :
+                  ?>
+                  <tr>
+                    <td><?= $no++ ?></td>
+                    <td><?= htmlspecialchars($row['kode_kelas']) ?></td>
+                    <td><?= htmlspecialchars($row['tingkat']) ?></td>
+                    <td><?= htmlspecialchars($row['jurusan_id']) ?></td>
+                    <td>
+                      <a href='update.php?id=<?= $row["id"] ?>' class='btn btn-success'>Edit</a>
+                      <a href='hapus.php?id=<?= $row["id"] ?>' class='btn btn-danger'>Delete</a>
+                    </td>
+                  </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+
+              <?php
+              $total_pages = ceil($totalData / $limit);
+              $current_page = ($offset / $limit) + 1;
+              $previous_page = $current_page - 1;
+              $next_page = $current_page + 1;
+              ?>
+
+              <nav aria-label="Page navigation">
+                <ul class="pagination">
+                  <li class="page-item <?= $current_page <= 1 ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?cari=<?= $cari ?>&offset=<?= $mundur ?>">Previous</a>
+                  </li>
+                  <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
+                  <li class="page-item <?= $current_page == $i ? 'active' : '' ?>">
+                    <a class="page-link" href="?cari=<?= $cari ?>&offset=<?= ($i - 1) * $limit ?>"><?= $i ?></a>
+                  </li>
+                  <?php endfor; ?>
+                  <li class="page-item <?= $current_page >= $total_pages ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?cari=<?= $cari ?>&offset=<?= $maju ?>">Next</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
+
   </main><!-- End #main -->
-  <?php
-  
-  ?>
+
+<?php
+include '../layout/footer.php';
+?>

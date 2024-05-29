@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'layout/header.php';
 
 ?>
@@ -230,6 +231,24 @@ include 'layout/header.php';
         <a class="nav-link collapsed" href="../page/buku/index.php">
         <i class="bi bi-book"></i>
           <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="spp/index.php">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+          <span>SPP</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="jurusan/index.php">
+        <i class="bi bi-bookshelf"></i>
+          <span>Jurusan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="/kelas/index.php">
+        <i class="bi bi-building"></i>
+          <span>Kelas</span>
         </a>
       </li>
       

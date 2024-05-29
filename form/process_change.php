@@ -1,17 +1,23 @@
 <?php
 session_start();
-$_SESSION['logged_in'] = true;
-$_SESSION['id'] = $user_id; // Atau set sesuai dengan id pengguna yang sudah login
+
+// Pastikan session sudah terbaca
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    $_SESSION['error'] = 'Anda harus login terlebih dahulu.';
+    header('Location: change_login.php');
+    exit();
+}
+
+// Pastikan session 'id' telah teratur
+if (!isset($_SESSION['id'])) {
+    $_SESSION['error'] = 'Sesi ID tidak tersedia.';
+    header('Location: change_login.php');
+    exit();
+}
 
 include '../config/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
-    if (!isset($_SESSION['id'])) {
-        $_SESSION['error'] = 'Anda harus login terlebih dahulu.';
-        header('Location: change_login.php');
-        exit();
-    }
-
     $old_password = $_POST['password_lama'];
     $new_password = $_POST['password_baru'];
     $confirm_password = $_POST['konfir_password'];
